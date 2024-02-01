@@ -1,6 +1,6 @@
 document.querySelector("#btn-find").addEventListener("click", function () {
     const postId = document.querySelector("#input-id").value
-    if (isNaN(postId) && parseInt(postId) < 1 &&  parseInt(postId) > 100) {
+    if (isNaN(postId) || parseInt(postId) < 1 || parseInt(postId) > 100 || postId === '') {
         alert("The id must be a value between 1 and 100")
     }
     else {
