@@ -1,76 +1,85 @@
-document.querySelector("#btn-find").addEventListener("click", function () {
-    const postId = document.querySelector("#input-id").value
-    if (isNaN(postId) || parseInt(postId) < 1 || parseInt(postId) > 100 || postId === '') {
-        alert("The id must be a value between 1 and 100")
-    }
-    else {
-        getPost(postId)
-            .then(post => {
-                console.log("data retrieved successfully:", post);
-                getComments(postId)
-                    .then(comments => {
-                        console.log("data retrieved successfully:", comments);
-                        document.querySelector("#result").innerHTML = `
-                        <h3 style='color:blue'>Post:</h3>
-                        <pre>
-                            ${JSON.stringify(post, null, 2)}
-                        </pre>
-                        <h3 style='color:green'>Comments:</h3>
-                        <pre>
-                            ${JSON.stringify(comments, null, 2)}
-                        </pre>
-                        
-                        `
-                    })
-                    .catch(error => {
-                        console.error("Error getting data", error);
-                    });
-            })
-            .catch(error => {
-                console.error("Error getting data", error);
-            });
-    }
+// let apiKey = 'c7e86c1c87591dc14f189a0c06d97fc6' 
+// fetch('http://api.openweathermap.org/data/2.5/weather?id=ID_ВАШЕГО_ГОРОДА&lang=ru&appid=${apiKey}').then(function (resp) {return resp.json() }).then(function (data) {
 
+const search = document.querySelector('.container .search-box button');
+
+search.addEventListener('click', () => {
+    const apiKey = 'c7e86c1c87591dc14f189a0c06d97fc6';
+    const city = document.querySelector('.search-box input').value;
+    if (city == '') {
+        alert('Введіть місто');
+        return;
+    }
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`)
+        .then(resp => {
+            if (resp.ok) {
+                const json = resp.json();
+            } else {
+                let errMsg = null;
+                const status = resp.status;
+                if (status == 404)
+                    errMsg = 'Місто або погода не знайдені';
+                else if (status == 500)
+                    errMsg = 'Внутрішня помилка серверу';
+                else 
+                    errMsg = 'Сталася прикра помилка. Наша кваліфікована команда розбирається з нею'
+                alert(errMsg)
+            }
+            const temperature = document.querySelector('.temperature');
+            const description = document.querySelector('.info-weather .description');
+            const humidity = document.querySelector('.details .humidity span');
+            const windSpeed = document.querySelector('.details .wind-speed span');
+            const pressure = document.querySelector('.details .pressure span');
+            const deg = document.querySelector('.details .deg span');
+            const iconContainer = document.querySelector('.icon-container')
+            temperature.innerHTML = `${parseInt(json.main.temp - 273)} <span>&deg</span>`;
+            description.innerHTML = `${json.weather[0].description}`;
+            humidity.innerHTML = `${json.main.humidity}%`;
+            windSpeed.innerHTML = `${parseInt(json.wind.speed)} <span>м/с</span>`;
+            pressure.innerHTML = `${json.main.pressure}`;
+            deg.innerHTML = `${json.wind.deg}`;
+            iconContainer.innerHTML = `<img src="http://openweathermap.org/img/w/${json.weather[0].icon}.png"/>`
+        })
+        .catch(error => {
+            console.log('Error occured', error)
+        });
 })
 
 
 
-function getPost(id) {
-    return new Promise((resolve, reject) => {
-        const url = `https://jsonplaceholder.typicode.com/posts/${id}`;
 
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`An error occurred. Code: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                resolve(data);
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
-}
 
-function getComments(postId) {
-    return new Promise((resolve, reject) => {
-        const url = `https://jsonplaceholder.typicode.com/comments?postId=${postId}`;
 
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`An error occurred. Code: ${response.status}`)
-                }
-                return response.json();
-            })
-            .then(data => {
-                resolve(data);
-            })
-            .catch(error => {
-                reject(error);
-            });
-    });
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

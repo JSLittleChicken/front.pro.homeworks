@@ -1,15 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Weather</title>
 </head>
+
 <body>
-    <label for="input-id">ID Post:</label>
-    <input id="input-id" type="number" min="1" max="100"/>
-    <button id="btn-find" type="submit">Find</button>
-    <div id="result"></div>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" placeholder="Введіть місто">
+            <button class="search-btn">Пошук</button>
+        </div>
+        <div class="inner-container">
+            <div class="info-weather">
+                <div class="icon-container">
+        
+                </div>
+                <div class="weather">
+                    <p class="temperature">...<span>&deg</span></p>
+                    <p class="description">...</p>
+                </div>
+            </div>
+            <div class="details">
+                <div class="humidity">
+                    <div class="text">
+                        <div class="info-humidity">
+                            <p>Вологість: <span>...</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="wind-speed">
+                    <div class="text">
+                        <div class="wind">
+                            <p class="speed">Швидкість вітру: <span>...</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="deg">
+                    <div class="text">
+                        <div class="deg-info">
+                            <p>Напрямок: <span>...</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pressure">
+                    <div class="text">
+                        <div class="pressure-info">
+                            <p>Тиск: <span>...</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
     <script src="main.js"></script>
 </body>
+
 </html>
