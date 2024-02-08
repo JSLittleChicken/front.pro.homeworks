@@ -32,6 +32,8 @@ div.product-list {
 ul {
     list-style: none;
     padding: 0;
+    margin-block-start: 10px;
+    margin-block-end: 10px;
 }
 li {
     margin: 10px;
@@ -49,16 +51,30 @@ a:hover {
 }
 
 img {
-    width:400px;
-    height: 400px;
+    width: 300px;
+    height: 300px;
 }
 
 button {
+    margin: 10px;
     border-radius: 5px;
     background-color: blanchedalmond;
     padding: 20px;
     cursor: pointer;
 }
+button.more {
+    border: 1px solid green;
+}
+button.delete {
+    border: 1px solid red;
+}
+span#counter {
+    padding: 2px 6px;
+    border-radius: 50%;
+    background-color: #f92c2c;
+    color: white;
+}  
+
 li.selected {
     box-shadow: 0 0 5px 2px #0067ff;
 }

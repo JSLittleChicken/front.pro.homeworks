@@ -75,29 +75,43 @@ const products = [
 
 let selectedCat;
 let selectedItem;
+let counterVal;
 
-const categories = document.querySelectorAll("li > a[id]");
-categories.forEach(category => {
-    const categoryId = category.id;
-    category.addEventListener('click', () => {
-        if (selectedCat && selectedCat !== categoryId) {
-            document.querySelector('aside li.selected').classList.remove('selected')
-        }
-        if (selectedCat !== categoryId) {
-            renderProductList(categoryId);
-            category.parentNode.classList.add('selected');
-            selectedCat = categoryId;
-            selectedItem = undefined;
-        }            
-    });
-});
+const getHistoryObj = () => {
+    return JSON.parse(window.localStorage.getItem('orderHistory'));
+}
+
+const saveHistory = (orderHistory) => {
+    window.localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+}
+
+const getCounter = () => {
+    const orderHistory = getHistoryObj()
+    if (orderHistory)
+        counterVal = orderHistory.length;
+    else
+        counterVal = 0;
+} 
+
+const updateCounter = (num) => {
+    const counter = document.getElementById('counter');
+    counter.innerText = num;
+    counterVal = num;
+}
 
 const renderProductList = (categoryId) => {
     const filteredProducts = products.filter((product) => product.category === categoryId);
-    const productListContainer = document.querySelector(".product-list");
-    productListContainer.replaceChildren()
+    let productListContainer = document.querySelector('div.product-list');
+    if (productListContainer) {
+        productListContainer = document.querySelector('div.product-list');
+        productListContainer.replaceChildren();
+    } else {
+        productListContainer = document.createElement('div');
+        productListContainer.className = 'product-list';
+        document.querySelector('main').prepend(productListContainer)
+    }
     
-    const productItemContainer = document.querySelector(".product-item");
+    const productItemContainer = document.querySelector(".item");
     productItemContainer.replaceChildren()
 
     const productsList = document.createElement('ul');
@@ -125,7 +139,7 @@ const renderProductList = (categoryId) => {
 
 const renderProductItem = (itemId) => {
     const product = products.find(product => product.id === itemId);
-    const productItemContainer = document.getElementsByClassName("product-item")[0];
+    const productItemContainer = document.getElementsByClassName("item")[0];
     productItemContainer.replaceChildren();
 
     const productName = document.createElement("h2");
@@ -143,14 +157,14 @@ const renderProductItem = (itemId) => {
     productPrice.className = 'product-price';
 
     const cartButton = document.createElement('button');
-    cartButton.innerText = 'Додати у кошик';
+    cartButton.innerText = 'Купити';
     cartButton.addEventListener('click', () => {
         const overlay = document.createElement('div');
         overlay.className = 'popup-overlay';
         overlay.id = 'overlay';
-
+        saveOrder(product);
         const popup = document.createElement('div');
-        popup.innerHTML = `<p>Товар "${product.name}" успішно додано до кошику</p>`;
+        popup.innerHTML = `<p>Товар "${product.name}" успішно куплений</p>`;
         popup.className = 'success-popup';
 
         document.querySelector('body').appendChild(overlay);
@@ -164,14 +178,160 @@ const renderProductItem = (itemId) => {
         productPrice, 
         cartButton
     );
-    const setDefault = () => {
-        document.getElementById('overlay').remove()
-        document.querySelector('.product-item').replaceChildren();
-        document.querySelector('.product-list').replaceChildren();
-        selectedCat = undefined;
-        selectedItem = undefined;
-        document.querySelector('li.selected').classList.remove('selected');
+}
+
+const setDefault = () => {
+    const overlay = document.getElementById('overlay')
+    if (overlay)
+        overlay.remove()
+    document.querySelector('.item').replaceChildren();
+    if (document.querySelector('.product-list')) {
+        document.querySelector('.product-list').remove();
+    }
+    selectedCat = undefined;
+    selectedItem = undefined;
+    const selectedLi = document.querySelector('li.selected');
+    if (selectedLi)
+        selectedLi.classList.remove('selected');
+}
+
+const saveOrder = (product) => {
+    let orderHistory = JSON.parse(window.localStorage.getItem('orderHistory'));
+
+    let id;
+    if (!orderHistory || (orderHistory && orderHistory.length == 0)) {
+        id = 1;
+    } else {
+        id = orderHistory[orderHistory.length - 1].id + 1
+    }
+
+    const newOrder = {
+        id: id,
+        date: new Date().toLocaleString("uk"),
+        price: product.price,
+        product: product.id
+    }
+
+    if (orderHistory)
+        orderHistory.push(newOrder);
+    else 
+        orderHistory = [newOrder]
+
+    saveHistory(orderHistory);
+    updateCounter(orderHistory.length);
+}
+
+const renderOrderHistory = () => {
+    const orderHistory = JSON.parse(window.localStorage.getItem('orderHistory'));
+    const ul = document.querySelector("aside.menu nav ul");
+    ul.replaceChildren();
+    let renderable = "";
+    if (!orderHistory || (orderHistory && orderHistory.length == 0)) {
+        ul.innerHTML = "<li>Історія замовлень пуста, клікніть, щоб повернутися назад</li>";
+    }
+    else {
+        orderHistory.forEach(entry => {
+            ul.appendChild(createOrderEntry(entry))
+        });
+    }
+    setDefault();
+    rerenderButton('showCategories')
+}
+
+const createOrderEntry = (entry) => {
+    const el = document.createElement('li');
+    el.id = `order-${entry.id}`;
+    el.innerHTML = `
+    <p>№ замовлення: <span>${entry.id}</span></p>
+    <p>Дата: <span>${entry.date}</span></p>
+    <p>Ціна: <span>${entry.price}</span> ГРН.</p>`;
+
+    const buttonDel = document.createElement('button');
+    buttonDel.className = 'delete';
+    buttonDel.innerText = 'Видалити покупку';
+    buttonDel.addEventListener('click', () => {
+        deleteOrderEntry(entry.id);
+    });
+    
+    const buttonMore = document.createElement('button');
+    buttonMore.className = 'more'
+    buttonMore.innerText = 'Детальніше'
+    buttonMore.addEventListener('click', () => {
+        renderOrderDetails(entry.id);
+    });
+
+    el.append(buttonDel, buttonMore)
+    return el
+}
+
+const deleteOrderEntry = (id) => {
+    document.querySelector(`li#order-${id}`).remove();
+    const orderHistory = getHistoryObj();
+    const newHistory = orderHistory.filter((entry) => entry.id != id);
+    saveHistory(newHistory);
+    setDefault();
+    counterVal = newHistory.length
+}
+
+const renderOrderDetails = (id) => {
+    const order = getHistoryObj().find(order => order.id === id);
+    const product = products.find(product => product.id === order.product);
+    const itemContainer = document.querySelector(".item");
+    itemContainer.replaceChildren();
+    const orderInfoHtml = `
+    <h2>Номер замовлення: ${id}</h2>
+    <p>Дата замовлення: ${order.date}</p>
+    <p>Сплачено: ${order.price}
+    <p>Назва товару: ${product.name}</p>
+    <img src="${product.image}">
+    `
+    itemContainer.innerHTML = orderInfoHtml
+}
+
+const renderCategories = () => {
+    const ul = document.querySelector(".menu ul")
+    ul.replaceChildren()
+    ul.innerHTML = `
+    <li><a href="#" id="health-and-beauty">HEALTH AND BEAUTY</a></li>
+    <li><a href="#" id="mobile">MOBILE PHONES</a></li>
+    <li><a href="#" id="tv">TV</a></li>
+    `
+    const categories = document.querySelectorAll("li > a[id]");
+    categories.forEach(category => {
+    const categoryId = category.id;
+    category.addEventListener('click', () => {
+        if (selectedCat && selectedCat !== categoryId) {
+            document.querySelector('aside li.selected').classList.remove('selected')
+        }
+        if (selectedCat !== categoryId) {
+            renderProductList(categoryId);
+            category.parentNode.classList.add('selected');
+            selectedCat = categoryId;
+            selectedItem = undefined;
+        }            
+    });
+    setDefault();
+    rerenderButton('shwoOrders')
+});
+}
+
+const rerenderButton = (btnType) => {
+    if (btnType == 'showCategories') {
+        switchModeButton.innerText = 'Показати категорії';
+        switchModeButton.removeEventListener('click', renderOrderHistory);
+        switchModeButton.addEventListener('click', renderCategories);
+    } else if (btnType == 'shwoOrders') {
+        switchModeButton.innerHTML = 'Історія замовлень <span id="counter">0<span>';
+        updateCounter(counterVal);
+        switchModeButton.removeEventListener('click', renderCategories);
+        switchModeButton.addEventListener('click', renderOrderHistory);
     }
 }
 
-// console.log(renderProductList('health-and-beauty'));
+const switchModeButton = document.getElementById("switch-mode")
+
+window.onload = () => {
+    renderCategories();
+    getCounter();
+    updateCounter(counterVal);
+}
