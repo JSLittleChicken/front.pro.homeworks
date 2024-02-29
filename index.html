@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
+
 <body>
-    <h1>Browser Info</h1>
-    <p id="browser-info"></p>
-
-    <h1>Devices</h1>
-    <div id="checkboxes">
-        <input type="checkbox" id="samsungCheckbox" value="samsung"> Samsung<br>
-        <input type="checkbox" id="asusCheckbox" value="asus"> Asus<br>
-        <input type="checkbox" id="appleCheckbox" value="apple"> Apple<br>
-        <input type="checkbox" id="lenovoCheckbox" value="lenovo"> Lenovo<br>
+    <div id="slider-container">
+        <div id="top">
+            <img src="images/leftarrow.png" alt="" class="arrow arrow-left">
+            <div id="slider">
+                <img src="images/img1.jpg" alt="" class="slider-image block">
+                <img src="images/img2.jpg" alt="" class="slider-image">
+                <img src="images/img3.jpg" alt="" class="slider-image">
+            </div>
+            <img src="images/leftarrow.png" alt="" class="arrow arrow-right">
+        </div>
+        <div id="bottom"></div>
     </div>
-
     <script src="main.js"></script>
 </body>
+
 </html>
