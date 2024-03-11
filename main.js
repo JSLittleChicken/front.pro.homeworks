@@ -1,70 +1,31 @@
-const arrowLeft = document.querySelector(".arrow-left");
-const arrowRight = document.querySelector(".arrow-right");
-const slides = document.querySelectorAll(".slider-image");
-const bottom = document.getElementById("bottom");
+document.body.innerHTML = `
+    <div class='protocol-block'>
+        <input id='input' type='text' />
+        <button id='http'>Do HTTP</button>
+        <button id='https'>Do HTTPS</button>
+    </div>
+`;
 
-let currentSlideIndex = 0;
-const paginationCircles = [];
+const input = document.getElementById('input');
+const httpButton = document.getElementById('http');
+const httpsButton = document.getElementById('https');
 
-function createPaginationCircle() {
-    const div = document.createElement("div");
-    div.className = "pagination-circle";
-    bottom.appendChild(div);
-    paginationCircles.push(div);
-}
+function AddProtocol(pType) {
+    val = input.value.toString()
 
-function addPagination() {
-    slides.forEach(createPaginationCircle);
-    paginationCircles[0].classList.add("active");
-    paginationCircles.forEach((circle, index) => {
-        circle.addEventListener("click", () => changeSlide(index));
-    });
-}
-
-function showSlide() {
-    slides[currentSlideIndex].classList.add("block");
-    paginationCircles[currentSlideIndex].classList.add("active");
-}
-
-function hideSlide() {
-    paginationCircles[currentSlideIndex].classList.remove("active");
-    slides[currentSlideIndex].classList.remove("block");
-}
-
-function changeSlide(slideIndex) {
-    hideSlide();
-    currentSlideIndex = slideIndex;
-    showSlide();
-    checkArrows();
-}
-
-function checkArrows() {
-    arrowRight.style.visibility = "visible";
-    arrowLeft.style.visibility = "visible";
-    if (currentSlideIndex == 0) {
-        arrowLeft.style.visibility = "hidden"
-    } else if (currentSlideIndex == slides.length - 1) {
-        arrowRight.style.visibility = "hidden"
+    if (!val) {
+        console.log('empty string!!!');
+        return
     }
-}
-
-function nextSlide() {
-    let newSlideIndex = currentSlideIndex + 1;
-    if (newSlideIndex > slides.length - 1) {
-        newSlideIndex = 0;
+    let url;
+    try {
+        url = new URL(val);
+        url.protocol = pType;
+    } catch {
+        url = new URL(`${pType}://${val}`);
     }
-    changeSlide(newSlideIndex);
+    console.log(`making ${pType} >>>`, url.href)
 }
 
-function previousSlide() {
-    let newSlideIndex = currentSlideIndex - 1;
-    if (newSlideIndex < 0) {
-        newSlideIndex = slides.length - 1;
-    }
-    changeSlide(newSlideIndex);
-}
-
-addPagination();
-arrowLeft.addEventListener("click", previousSlide);
-arrowRight.addEventListener("click", nextSlide);
-checkArrows();
+httpButton.addEventListener('click', () => {AddProtocol('http')});
+httpsButton.addEventListener('click', () => {AddProtocol('https')})
